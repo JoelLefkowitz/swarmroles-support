@@ -1,0 +1,47 @@
+output_dir: .
+
+clear_top_level: true
+logical_grouping: true
+
+collections:
+  - common
+  - python
+
+loader_paths:
+  - docs
+
+protected:
+  - MANIFEST.in
+
+render_context:
+  project:
+    project_name: swarmroles-support
+    version: 0.1.0
+
+    verbose_name: Swarmroles support
+    description: Ansible supporting roles for deploying a docker swarm.
+
+    repository: https://github.com/JoelLefkowitz/swarmroles-support
+    codacy_id: 1e1e1d73779c477cb0fd1ab1866d8b34
+
+    inserts:
+      - usage.md
+
+  author:
+    author: Joel Lefkowitz
+    author_email: joellefkowitz@hotmail.com
+    author_github_handle: joellefkowitz
+
+  package:
+    is_pypi_pacakge: false
+    package_name: roles
+
+  portfolio:
+    is_portfolio: true
+    status_level: 1
+
+    languages:
+      - Python
+
+    frameworks:
+      - Ansible
