@@ -1,214 +1,30 @@
-# Swarmroles
+# Swarmroles support
 
 Ansible supporting roles for deploying a docker swarm.
 
 ## Status
 
-| Source     | Shields                                                                                                            |
-| ---------- | ------------------------------------------------------------------------------------------------------------------ |
-| Project    | ![release][release_shield] ![license][license_shield] ![dependents][dependents_shield]                             |
-| Health     | ![travis][travis_shield] ![codacy][codacy_shield] ![coverage][coverage_shield] ![readthedocs][readthedocs_shield]  |
-| Repository | ![issues][issues_shield] ![pulls][pulls_shield]                                                                    |
-| Activity   | ![contributors][contributors_shield] ![monthly_commits][monthly_commits_shield] ![last_commit][last_commit_shield] |
+| Source     | Shields                                                                                                                         |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Project    | ![release][release_shield] ![license][license_shield]  ![lines][lines_shield] ![languages][languages_shield]                    |
+| Health     | ![codacy][codacy_shield] ![readthedocs][readthedocs_shield] ![travis][travis_shield] ![codacy_coverage][codacy_coverage_shield] |
+| Repository | ![issues][issues_shield] ![issues_closed][issues_closed_shield] ![pulls][pulls_shield] ![pulls_closed][pulls_closed_shield]     |
+| Activity   | ![contributors][contributors_shield] ![monthly_commits][monthly_commits_shield] ![last_commit][last_commit_shield]              |
 
-## Installation
+## Installing
 
 ```bash
-ansible-galaxy collection install joellefkowitz.swarmroles
+git clone https://github.com/JoelLefkowitz/swarmroles-support
 ```
 
-## Motivating example
-
-Select the first member of the manager group and have them initiate a swarm and perform the certbot authentication.
-
-```yml
-- hosts: &swarm_initiator manager[0]
-  user: root
-  vars:
-    - domains: example.com
-  roles:
-    - joellefkowitz.swarmroles.swarm_initiator
-    - joellefkowitz.swarmroles.certbot
-```
-
-Register the first member of the manager group as the swarm_initiator and pass the swarm tokens to the rest of the manager group. Provide a list of images to pull and a docker username if the images require a login for access. An access token can be issued under the environemnt variable name DOCKER_ACCESS_TOKEN.
-
-```yml
-- hosts: manager
-  user: root
-  vars:
-    - docker_username: joellefkowitz
-    - pull_images:
-        - joellefkowitz/example:0.1.0_prod
-  pre_tasks: &register_swarm_initiator
-    - name: Fetch the swarm initiator host
-      set_fact:
-        swarm_initiator: "{{groups['manager'][0]}}"
-  roles:
-    - role: joellefkowitz.swarmroles.swarm_manager
-      swarm_join_addr: "{{ hostvars[swarm_initiator]['swarm_join_addr'] }}"
-      swarm_manager_token: "{{ hostvars[swarm_initiator]['swarm_manager_token'] }}"
-```
-
-Perform the same registration for all members of the worker group.
-
-```yml
-- hosts: worker
-  user: root
-  pre_tasks: *register_swarm_initiator
-  roles:
-    - role: joellefkowitz.swarmroles.swarm_worker
-      swarm_join_addr: "{{ hostvars[swarm_initiator]['swarm_join_addr'] }}"
-      swarm_worker_token: "{{ hostvars[swarm_initiator]['swarm_worker_token'] }}"
-```
-
-Have a manager deploy the swarm. Copy over the compose file and any environment files required.
-
-```yml
-- hosts: *swarm_initiator
-  user: root
-  vars:
-    - stack_name: prod
-    - compose_file: docker-compose.yml
-    - env_files:
-        - prod.example.env
-  roles:
-    - joellefkowitz.swarmroles.stack_deployer
-```
-
-## Roles
-
-### base
-
-Installs python and setuptools
-
----
-
-### docker
-
-Installs the docker engine for Ubuntu
-
-#### Extends
-
-- base
-
----
-
-### swarm_initiator
-
-Initialises a docker swarm
-
-#### Extends
-
-- docker
-
-#### Sets facts
-
-- swarm_join_addr
-- swarm_manager_token
-- swarm_worker_token
-
----
-
-### swarm_manager
-
-Joins a docker swarm as a manager and pulls a list of images.
-
-#### Extends
-
-- docker
-
-#### Variables
-
-- swarm_join_addr
-- swarm_manager_token
-- docker_username
-- pull_images (List of strings)
-
-#### Environment
-
-- DOCKER_ACCESS_TOKEN
-
-#### Notes
-
-- Docker login will only be attempted when docker_username is defined
-
----
-
-### swarm_worker
-
-Joins a docker swarm as a worker
-
-#### Extends
-
-- docker
-
-#### Variables
-
-- swarm_join_addr
-- swarm_worker_token
-
----
-
-### stack_deployer
-
-Deploys a stack to a docker swarm
-
-#### Extends
-
-- docker
-
-#### Variables
-
-- deploy_dir (Defaults to 'deploy')
-- compose_file
-- env_files (List of strings)
-- stack_name
-
----
-
-### certbot
-
-Performs certbot authentication
-
-#### Variables
-
-- domains (Space separated strings)
-
-#### Notes
-
-- Certbot authentication will be skipped if domains is undefined
-
-- Nginx will be signalled to stop in order to reclaim ports. This will fail softly and be ignored.
-
-#### Explanation
-
-When deploying a webapp to a swarm I often have an nginx service that exposes an https endpoint. In the docker-compose file I bind the certificate on the swarm node to the service.
-
-```yml
-volumes:
-  - type: bind
-    source: /etc/letsencrypt/live/joellefkowitz.co.uk/fullchain.pem
-    target: /etc/nginx/joellefkowitz.co.uk.crt
-  - type: bind
-    source: /etc/letsencrypt/live/joellefkowitz.co.uk/privkey.pem
-    target: /etc/nginx/joellefkowitz.co.uk.key
-```
-
-So in the same way that pulling images and copying necessary files must happen on every manager node, we may also need to fetch certificates from an external source so that the services have everything they need in order to launch.
+## Usage
 
 ## Tests
 
-To run unit tests:
+To run unit tests and generate a coverage report:
 
 ```bash
 grunt tests:unit
-```
-
-To generate a coverage report:
-
-```bash
-grunt tests:coverage
 ```
 
 ## Documentation
@@ -241,18 +57,22 @@ To run formatters:
 grunt format
 ```
 
-Before commiting new code:
+Before committing new code:
 
 ```bash
 grunt precommit
 ```
 
-This will run linters, formaters, generate a test coverage report and the sphinx configuration.
+This will run linters, formatters, tests, generate a test coverage report and the sphinx configuration.
+
+## Continuous integration
+
+This repository uses Travis CI to build and test each commit. Formatting tasks and writing/generating documentation must be done before committing new code.
 
 ## Versioning
 
 This repository adheres to semantic versioning standards.
-For more inforamtion on semantic versioning visit [SemVer][semver].
+For more information on semantic versioning visit [SemVer][semver].
 
 Bump2version is used to version and tag changes.
 For example:
@@ -271,7 +91,7 @@ Please read this repository's guidelines on [CONTRIBUTING](CONTRIBUTING.md) for 
 
 ## Contributors
 
-- **Joel Lefkowitz** - _Initial work_ - [Joel Lefkowitz][joellefkowitz]
+- **Joel Lefkowitz** - _Initial work_ - [Joel Lefkowitz][author]
 
 [![Buy Me A Coffee][coffee_button]][coffee]
 
@@ -281,43 +101,37 @@ Lots of love to the open source community!
 
 ![Be kind][be_kind]
 
-<!-- Github links -->
-
-[pulls]: https://github.com/JoelLefkowitz/swarmroles/pulls
-[issues]: https://github.com/JoelLefkowitz/swarmroles/issues
+<!-- Public links -->
+[semver]: http://semver.org/
 
 <!-- External links -->
-
-[readthedocs]: https://swarmroles.readthedocs.io/en/latest/
-[semver]: http://semver.org/
+[readthedocs]: https://swarmroles-support.readthedocs.io/en/latest/
 [coffee]: https://www.buymeacoffee.com/joellefkowitz
 [coffee_button]: https://cdn.buymeacoffee.com/buttons/default-blue.png
 [be_kind]: https://media.giphy.com/media/osAcIGTSyeovPq6Xph/giphy.gif
 
 <!-- Acknowledgments -->
-
-[joellefkowitz]: https://github.com/JoelLefkowitz
+[author]: https://github.com/joellefkowitz
 
 <!-- Project shields -->
-
-[release_shield]: https://img.shields.io/github/v/tag/joellefkowitz/swarmroles
-[license_shield]: https://img.shields.io/github/license/joellefkowitz/swarmroles
-[dependents_shield]: https://img.shields.io/librariesio/dependent-repos/pypi/swarmroles
+[release_shield]: https://img.shields.io/github/v/tag/joellefkowitz/swarmroles-support
+[license_shield]: https://img.shields.io/github/license/joellefkowitz/swarmroles-support
+[lines_shield]: https://img.shields.io/tokei/lines/github/joellefkowitz/swarmroles-support
+[languages_shield]: https://img.shields.io/github/languages/count/joellefkowitz/swarmroles-support
 
 <!-- Health shields -->
-
-[travis_shield]: https://img.shields.io/travis/joellefkowitz/swarmroles
-[codacy_shield]: https://img.shields.io/codacy/coverage/swarmroles
-[coverage_shield]: https://img.shields.io/codacy/grade/swarmroles
-[readthedocs_shield]: https://img.shields.io/readthedocs/swarmroles
+[codacy_shield]: https://img.shields.io/codacy/grade/1e1e1d73779c477cb0fd1ab1866d8b34
+[readthedocs_shield]: https://img.shields.io/readthedocs/swarmroles-support
+[travis_shield]: https://img.shields.io/travis/com/joellefkowitz/swarmroles-support
+[codacy_coverage_shield]: https://img.shields.io/codacy/coverage/1e1e1d73779c477cb0fd1ab1866d8b34
 
 <!-- Repository shields -->
-
-[issues_shield]: https://img.shields.io/github/issues/joellefkowitz/swarmroles
-[pulls_shield]: https://img.shields.io/github/issues-pr/joellefkowitz/swarmroles
+[issues_shield]: https://img.shields.io/github/issues/joellefkowitz/swarmroles-support
+[issues_closed_shield]: https://img.shields.io/github/issues-closed/joellefkowitz/swarmroles-support
+[pulls_shield]: https://img.shields.io/github/issues-pr/joellefkowitz/swarmroles-support
+[pulls_closed_shield]: https://img.shields.io/github/issues-pr-closed/joellefkowitz/swarmroles-support
 
 <!-- Activity shields -->
-
-[contributors_shield]: https://img.shields.io/github/contributors/joellefkowitz/swarmroles
-[monthly_commits_shield]: https://img.shields.io/github/commit-activity/m/joellefkowitz/swarmroles
-[last_commit_shield]: https://img.shields.io/github/last-commit/joellefkowitz/swarmroles
+[contributors_shield]: https://img.shields.io/github/contributors/joellefkowitz/swarmroles-support
+[monthly_commits_shield]: https://img.shields.io/github/commit-activity/m/joellefkowitz/swarmroles-support
+[last_commit_shield]: https://img.shields.io/github/last-commit/joellefkowitz/swarmroles-support
