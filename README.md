@@ -3,8 +3,6 @@
 Ansible supporting roles for deploying a docker swarm.
 
 ![Review](https://img.shields.io/github/actions/workflow/status/JoelLefkowitz/swarmroles-support/review.yml)
-![Version](https://img.shields.io/pypi/v/swarmroles-support)
-![Downloads](https://img.shields.io/pypi/dw/swarmroles-support)
 
 ## Documentation
 
