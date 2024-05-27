@@ -1,31 +1,53 @@
 {
   "language": "en",
-  "ignorePaths": [
-    "./.cspell.txt",
-    "./package-lock.json",
-    ".gitignore",
-    "*.coverage",
-    "*.types",
-    "**/__pycache__/**",
-    "**/*.egg-info/**",
-    "**/build/**",
-    "**/dist/**",
-    "**/node_modules/**",
-    "**/sqlite3",
-    "**/venv/**"
-  ],
   "dictionaries": [
+    "aws",
+    "bash",
+    "en-gb",
+    "fullstack",
     "misc",
-    "node",
-    "python",
-    "softwareTerms",
-    "typescript",
-    "local"
+    "softwareTerms"
   ],
-  "dictionaryDefinitions": [
-    {
-      "name": "local",
-      "path": ".cspell.txt"
-    }
+  "ignorePaths": [".git"],
+  "words": [
+    "autoapi",
+    "autoflake",
+    "autosummary",
+    "bumpversion",
+    "certbot",
+    "certonly",
+    "cobertura",
+    "codacy",
+    "debugpy",
+    "doctest",
+    "excalidraw",
+    "forcereinstall",
+    "fullchain",
+    "furo",
+    "giphy",
+    "grotesk",
+    "isort",
+    "joellefkowitz",
+    "lefkowitz",
+    "letsencrypt",
+    "matplotlib",
+    "mypy",
+    "opengraph",
+    "privkey",
+    "pycache",
+    "pylint",
+    "pypa",
+    "pypi",
+    "pytest",
+    "sdist",
+    "searchindex",
+    "setuptools",
+    "sphinxext",
+    "swarmroles",
+    "toctree",
+    "trufflehog",
+    "undoc",
+    "venv",
+    "walkmate"
   ]
 }
